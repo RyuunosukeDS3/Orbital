@@ -16,12 +16,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// mock implementation of argocd.UpsertApplication
-var mockUpsertApplication func(appName string) error
+const route string = "/upsert" 
+const contentType string = "Content-Type"
+const appJson string = "application/json"
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.POST("/upsert", handler.UpsertArgoApp)
+	r.POST(route, handler.UpsertArgoApp)
 	return r
 }
 
@@ -39,8 +40,8 @@ func TestUpsertArgoAppSuccess(t *testing.T) {
 	payload := map[string]string{"appName": "test-app"}
 	body, _ := json.Marshal(payload)
 
-	req, _ := http.NewRequest("POST", "/upsert", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", route, bytes.NewBuffer(body))
+	req.Header.Set(contentType, appJson)
 	w := httptest.NewRecorder()
 
 	router.ServeHTTP(w, req)
@@ -51,8 +52,8 @@ func TestUpsertArgoAppSuccess(t *testing.T) {
 
 
 func TestUpsertArgoAppBadRequest(t *testing.T) {
-	req, _ := http.NewRequest("POST", "/upsert", bytes.NewBuffer([]byte("not json")))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", route, bytes.NewBuffer([]byte("not json")))
+	req.Header.Set(contentType, appJson)
 	w := httptest.NewRecorder()
 
 	router := setupRouter()
@@ -72,8 +73,8 @@ func TestUpsertArgoAppFailure(t *testing.T) {
 	payload := map[string]string{"appName": "bad-app"}
 	body, _ := json.Marshal(payload)
 
-	req, _ := http.NewRequest("POST", "/upsert", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", route, bytes.NewBuffer(body))
+	req.Header.Set(contentType, appJson)
 	w := httptest.NewRecorder()
 
 	router := setupRouter()
