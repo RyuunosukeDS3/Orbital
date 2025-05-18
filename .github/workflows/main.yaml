@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - uses: golangci/golangci-lint-action@v4
+      - uses: golangci/golangci-lint-action@v8
         with:
           version: v2.1.6
 
