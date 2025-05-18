@@ -18,9 +18,6 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install golangci-lint
-        run: go mod tidy
-
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
@@ -31,8 +28,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Run linter
-        run: golangci-lint run ./...
+      - uses: golangci/golangci-lint-action@v4
+        with:
+          version: 2.1.6
+
 
   build:
     name: Build Go App with Makefile

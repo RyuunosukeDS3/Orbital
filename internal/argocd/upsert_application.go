@@ -22,7 +22,11 @@ var UpsertApplication = func(appName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create ArgoCD client: %w", err)
 	}
-	defer conn.Close()
+	defer func() {
+        if err := conn.Close(); err != nil {
+            fmt.Printf("warning: failed to close connection: %v\n", err)
+        }
+    }()
 
 	ctx := context.Background()
 
