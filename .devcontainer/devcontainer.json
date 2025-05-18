@@ -1,0 +1,75 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go
+{
+	"name": "Orbital",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"installDockerBuildx": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "none"
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "20",
+			"pnpmVersion": "none",
+			"nvmVersion": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/lefthook-asdf:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
+            "plugins": "git zsh-autosuggestions zsh-syntax-highlighting fast-syntax-highlighting",
+            "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions https://github.com/zsh-users/zsh-syntax-highlighting https://github.com/zdharma-continuum/fast-syntax-highlighting"
+        },
+		"ghcr.io/jungaretti/features/make:1": {}
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [8080],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"initializeCommand": "echo '{ \"path\": \"@seniorsistemas/cz-conventional-senior\" }' > ~/.czrc && git config --local core.editor cat && git stash && git pull origin git rev-parse --abbrev-ref HEAD && git branch --merged | grep -v '^\\*' | grep -v 'master' | xargs -I % git branch -d % || true && git remote prune origin && git stash pop || true",
+	"postCreateCommand": "npm install -g @commitlint/cli@19 @seniorsistemas/commitlint-config-senior@1 commitizen@4 @seniorsistemas/cz-conventional-senior@1 && lefthook install && go mod tidy",
+
+	// Configure tool-specific properties.
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+		  "settings": {
+			"terminal.integrated.defaultProfile.linux": "zsh",
+			"editor.defaultFormatter": "gofmt",
+			"cSpell.enabled": true,
+			"sonarlint.connectedMode.connections.sonarcloud": [
+				{
+					"organizationKey": "ryuunosukeds3"
+				}
+			]
+		  },
+	
+		  // Add the IDs of extensions you want installed when the container is created.
+		  "extensions": [
+			"eamodio.gitlens",
+			"SonarSource.sonarlint-vscode",
+			"dbaeumer.vscode-eslint",
+			"hbenl.vscode-mocha-test-adapter",
+			"golang.go",
+			"ms-azuretools.vscode-docker"
+		  ]
+		}
+	},
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+
+	"mounts": [
+		{
+		"source": "${localEnv:HOME}${localEnv:USERPROFILE}/.czrc",
+		"target": "/home/node/.czrc",
+		"type": "bind"
+		}
+	]
+}
