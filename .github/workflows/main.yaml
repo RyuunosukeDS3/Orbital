@@ -179,7 +179,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     needs: sonar
-    if: github.ref == 'refs/heads/main'   # only run on main branch
+    if: github.ref == 'refs/heads/main'
     outputs:
       release_tag: ${{ steps.semantic.outputs.new_release_version }}
     steps:
@@ -194,13 +194,17 @@ jobs:
             "private": true
           }' > package.json
 
+      - name: Download remote .releaserc.json
+        run: curl -o .releaserc.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
+
       - name: Run semantic-release
         id: semantic
         uses: codfish/semantic-release-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
-          args: --extends https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
+          args: --extends .releaserc.json
+
 
 
 
