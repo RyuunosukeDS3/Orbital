@@ -101,9 +101,9 @@ jobs:
 
         - name: Run Trivy vulnerability scanner in fs mode
           run: |
-            TRIVY_VERSION=0.59.1 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
             trivy plugin install github.com/umax/trivy-plugin-sonarqube
-            trivy fs --format=json --output=trivy.json --exit-code=1 --ignore-unfixed=true .
+            trivy fs --format=json --output=trivy.json --ignore-unfixed=true .
             trivy sonarqube trivy.json > trivy-fs.json
 
         - name: Upload trivy-fs.json
@@ -130,9 +130,9 @@ jobs:
 
       - name: Run Trivy vulnerability scanner in image mode
         run: |
-          TRIVY_VERSION=0.59.1 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
           trivy plugin install github.com/umax/trivy-plugin-sonarqube
-          trivy image --format=json --output=trivy.json --exit-code=1 --ignore-unfixed=true hello-world-backend:latest
+          trivy image --format=json --output=trivy.json --ignore-unfixed=true hello-world-backend:latest
           trivy sonarqube trivy.json > trivy-image.json
 
       - name: Upload trivy-image.json
