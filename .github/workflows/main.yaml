@@ -181,10 +181,18 @@ jobs:
     needs: sonar
     if: github.ref == 'refs/heads/main'   # only run on main branch
     outputs:
-      release_tag: ${{ steps.semantic_release.outputs.new_release_version }}
+      release_tag: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Create dummy package.json
+        run: |
+          echo '{
+            "name": "semantic-release-placeholder",
+            "version": "0.0.0",
+            "private": true
+          }' > package.json
 
       - name: Run semantic-release
         id: semantic
@@ -193,5 +201,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
           args: --extends https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
+
 
 
