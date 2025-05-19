@@ -101,7 +101,7 @@ jobs:
 
         - name: Run Trivy vulnerability scanner in fs mode
           run: |
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+            TRIVY_VERSION=0.59.1 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
             trivy plugin install github.com/umax/trivy-plugin-sonarqube
             trivy fs --format=json --output=trivy.json --exit-code=1 --ignore-unfixed=true .
             trivy sonarqube trivy.json > trivy-fs.json
@@ -123,14 +123,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: image.tar
-          path: image.tar
+          path: .
 
       - name: Load docker image
         run: docker load -i image.tar
 
       - name: Run Trivy vulnerability scanner in image mode
         run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          TRIVY_VERSION=0.59.1 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
           trivy plugin install github.com/umax/trivy-plugin-sonarqube
           trivy image --format=json --output=trivy.json --exit-code=1 --ignore-unfixed=true hello-world-backend:latest
           trivy sonarqube trivy.json > trivy-image.json
