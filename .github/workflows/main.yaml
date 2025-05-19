@@ -57,13 +57,13 @@ jobs:
           go-version: '1.23'
 
       - name: Run tests with coverage
-        run: go test -v -coverprofile=coverage.out ./...
+        run: go test  -v -coverpkg=./... -coverprofile=.coverage-report.txt ./...
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage
-          path: coverage.out
+          path: .coverage-report.txt
 
   docker:
     name: Build Docker image
@@ -154,13 +154,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage
-          path: coverage/
-
-      - name: Download e2e test coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-e2e
-          path: coverage-e2e/
+          path: .
 
       - name: Download trivy-fs.json
         uses: actions/download-artifact@v4
