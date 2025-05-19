@@ -191,7 +191,6 @@ jobs:
         uses: codfish/semantic-release-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
           args: --extends https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
 
