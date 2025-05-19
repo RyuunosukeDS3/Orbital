@@ -57,7 +57,7 @@ jobs:
           go-version: '1.23'
 
       - name: Run tests with coverage
-        run: go test  -v -coverpkg=./internal/... -coverprofile=.coverage-report.txt ./internal/...
+        run: go test  -v -coverpkg=./internal/... -coverprofile=coverage-report.txt ./internal/...
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
