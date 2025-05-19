@@ -105,8 +105,8 @@ jobs:
       - name: Download dist
         uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: build
+          path: build/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -206,9 +206,6 @@ jobs:
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
-        with:
-          args: >
-            -Dsonar.externalIssuesReportPaths=trivy/trivy-fs.json,trivy/trivy-image.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
