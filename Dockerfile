@@ -5,4 +5,6 @@ ARG APP_NAME=orbital
 
 COPY build/${APP_NAME}-linux-${TARGETARCH} /usr/local/bin/${APP_NAME}
 
+EXPOSE 8080
+
 ENTRYPOINT ["/usr/local/bin/orbital"]
