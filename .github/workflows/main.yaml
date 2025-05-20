@@ -1,36 +1,214 @@
-release:
-  name: Release
-  runs-on: ubuntu-latest
-  needs: sonar
-  if: github.ref == 'refs/heads/main'
-  outputs:
-    release_tag: ${{ steps.semantic.outputs.new_release_version }}
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+name: DevSecOps Pipeline
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
 
-    - name: Download remote semantic-release configs
-      run: |
-        curl -o .releaserc.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.js
-        curl -o .releaserc.base.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.base.js
+jobs:
+  lint:
+    name: Lint Go Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-    - name: Install semantic-release and plugins
-      run: |
-        npm init -y
-        npm install semantic-release \
-          @semantic-release/commit-analyzer \
-          @semantic-release/release-notes-generator \
-          @semantic-release/github \
-          @semantic-release/git
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
 
-    - name: Run semantic-release
-      id: semantic
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: |
-        npx semantic-release
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.1.6
+
+
+  build:
+    name: Build Go App with Makefile
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go 1.23
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Run make build
+        run: make build
+
+      - name: Upload built binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbital-binaries
+          path: build/
+
+  test:
+    name: Run Go Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go 1.23
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Run tests with coverage
+        run: go test  -v -coverpkg=./internal/... -coverprofile=coverage-report.txt ./internal/...
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage-report.txt
+
+  docker:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: orbital-binaries
+          path: build/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build -t hello-world-backend:latest .
+          docker save hello-world-backend:latest -o image.tar
+
+      - name: Upload image.tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: image.tar
+          path: image.tar
+
+  trivy-fs:
+      name: Trivy FS Scan (Source Code)
+      runs-on: ubuntu-latest
+      needs: build
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Run Trivy vulnerability scanner in fs mode
+          run: |
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+            trivy plugin install github.com/umax/trivy-plugin-sonarqube
+            trivy fs --format=json --output=trivy.json --ignore-unfixed=true .
+            trivy sonarqube trivy.json > trivy-fs.json
+
+        - name: Upload trivy-fs.json
+          uses: actions/upload-artifact@v4
+          with:
+            name: trivy-fs.json
+            path: trivy-fs.json
+
+  trivy-image:
+    name: Trivy Image Scan
+    runs-on: ubuntu-latest
+    needs: docker
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download image.tar
+        uses: actions/download-artifact@v4
+        with:
+          name: image.tar
+          path: .
+
+      - name: Load docker image
+        run: docker load -i image.tar
+
+      - name: Run Trivy vulnerability scanner in image mode
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy plugin install github.com/umax/trivy-plugin-sonarqube
+          trivy image --format=json --output=trivy.json --ignore-unfixed=true hello-world-backend:latest
+          trivy sonarqube trivy.json > trivy-image.json
+
+      - name: Upload trivy-image.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image.json
+          path: trivy-image.json
+
+  sonar:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [test, trivy-fs, trivy-image]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Download unit test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          path: .
+
+      - name: Download trivy-fs.json
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-fs.json
+          path: trivy/
+
+      - name: Download trivy-image.json
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-image.json
+          path: trivy/
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: sonar
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      release_tag: ${{ steps.semantic.outputs.new_release_version }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download remote semantic-release configs
+        run: |
+          curl -o .releaserc.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.js
+          curl -o .releaserc.base.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.base.js
+
+      - name: Install semantic-release and plugins
+        run: |
+          npm init -y
+          npm install semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/github \
+            @semantic-release/git
+
+      - name: Run semantic-release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          npx semantic-release
+
