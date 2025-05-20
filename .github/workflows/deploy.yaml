@@ -58,7 +58,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --build-arg APP_NAME=orbital \
-            $(echo $TAGS | tr ',' '\n' | sed 's/^/-t your-dockerhub-username\/orbital:/') \
+            $(echo $TAGS | tr ',' '\n' | sed 's/^/-t ryuunosukeds3\/orbital:/') \
             --push .
 
   update_raspberry_cluster:
