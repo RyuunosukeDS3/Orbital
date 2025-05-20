@@ -192,9 +192,7 @@ jobs:
           node-version: '20'
 
       - name: Download semantic-release configs
-        run: |
-          curl -fsSL -o .releaserc.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
-          curl -fsSL -o .releaserc.config.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/releaserc.config.js
+        run: curl -fsSL -o .releaserc.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.js
 
       - name: Install semantic-release and plugins
         run: |
