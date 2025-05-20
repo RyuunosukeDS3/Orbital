@@ -194,15 +194,18 @@ jobs:
       - name: Download semantic-release configs
         run: |
           curl -fsSL -o .releaserc.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
-          curl -fsSL -o .releaserc.config.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.config.js
+          curl -fsSL -o .releaserc.config.js https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/releaserc.config.js
 
-      - name: Install semantic-release and plugins (no package.json created)
+      - name: Install semantic-release and plugins
         run: |
+          npm init -y
           npm install --no-save semantic-release \
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github \
-            @semantic-release/git
+            @semantic-release/git \
+            conventional-changelog-conventionalcommits
+
 
       - name: Run semantic-release
         id: semantic
