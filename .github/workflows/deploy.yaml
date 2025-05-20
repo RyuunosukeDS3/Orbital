@@ -63,40 +63,40 @@ jobs:
             --push .
 
     update_raspberry_cluster:
-    name: Update raspberry-cluster repo
-    runs-on: ubuntu-latest
-    needs: docker_build_and_push
-    steps:
-      - name: Checkout raspberry-cluster repo
-        uses: actions/checkout@v3
-        with:
-          repository: RyuunosukeDS3/raspberry-cluster
-          token: ${{ secrets.RELEASE_TOKEN }}
-          path: raspberry-cluster
+      name: Update raspberry-cluster repo
+      runs-on: ubuntu-latest
+      needs: docker_build_and_push
+      steps:
+        - name: Checkout raspberry-cluster repo
+          uses: actions/checkout@v3
+          with:
+            repository: RyuunosukeDS3/raspberry-cluster
+            token: ${{ secrets.RELEASE_TOKEN }}
+            path: raspberry-cluster
 
-      - name: Update orbital-values.yaml with current tag
-        run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          FILE="raspberry-cluster/orbital/helm/orbital-values.yaml"
+        - name: Update orbital-values.yaml with current tag
+          run: |
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            FILE="raspberry-cluster/orbital/helm/orbital-values.yaml"
 
-          # Use yq to update the yaml (install if not present)
-          if ! command -v yq &> /dev/null; then
-            echo "Installing yq..."
-            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-            sudo chmod +x /usr/local/bin/yq
-          fi
+            # Use yq to update the yaml (install if not present)
+            if ! command -v yq &> /dev/null; then
+              echo "Installing yq..."
+              sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+              sudo chmod +x /usr/local/bin/yq
+            fi
 
-          echo "Updating image.tag to $TAG_NAME in $FILE"
-          yq eval ".image.tag = \"$TAG_NAME\"" -i "$FILE"
+            echo "Updating image.tag to $TAG_NAME in $FILE"
+            yq eval ".image.tag = \"$TAG_NAME\"" -i "$FILE"
 
-          echo "Modified file:"
-          cat "$FILE"
+            echo "Modified file:"
+            cat "$FILE"
 
-      - name: Commit and push changes
-        run: |
-          cd raspberry-cluster
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add orbital/helm/orbital-values.yaml
-          git commit -m "chore: update orbital image tag to $TAG_NAME"
-          git push origin main
+        - name: Commit and push changes
+          run: |
+            cd raspberry-cluster
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add orbital/helm/orbital-values.yaml
+            git commit -m "chore: update orbital image tag to $TAG_NAME"
+            git push origin main
