@@ -191,17 +191,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Download remote package.json
-        run: curl -o package.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/package.json
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install dependencies
-        run: npm install @semantic-release/changelog
-
-      - name: Download remote .releaserc.json
-        run: curl -o .releaserc.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
+      - name: Download remote semantic-release configs
+        run: |
+          curl -o .releaserc.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.json
+          curl -o .releaserc.base.json https://raw.githubusercontent.com/RyuunosukeDS3/git-standards/main/.releaserc.base.json
+          npm install semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/github \
+            @semantic-release/git
 
       - name: Run semantic-release
         id: semantic
