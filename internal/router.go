@@ -11,7 +11,7 @@ func NewRouter() *gin.Engine {
 	r := gin.Default()
 
 	// Register the /createArgoApp route
-	r.POST("/upsertArgoApp", handler.UpsertArgoApp)
+	r.POST("/increaseReplicaCount", handler.IncreaseArgoAppReplicaCount)
 
 	return r
 }

@@ -12,7 +12,7 @@ type RequestBody struct {
 	AppName string `json:"appName"`
 }
 
-func UpsertArgoApp(c *gin.Context) {
+func IncreaseArgoAppReplicaCount(c *gin.Context) {
 	var requestBody RequestBody
 
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
@@ -21,7 +21,7 @@ func UpsertArgoApp(c *gin.Context) {
 	}
 
 	// Call ArgoCD Upsert logic
-	if err := argocd.UpsertApplication(requestBody.AppName); err != nil {
+	if err := argocd.IncreaseReplicaCount(requestBody.AppName); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create ArgoCD application",
 			"details": err.Error(),

@@ -12,7 +12,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 )
 
-var UpsertApplication = func(appName string) error {
+var IncreaseReplicaCount = func(appName string) error {
 	clientOpts := apiclient.ClientOptions{
 		ServerAddr: config.AppConfig.ArgoCDURL,
 		AuthToken:  config.AppConfig.ArgoCDToken,

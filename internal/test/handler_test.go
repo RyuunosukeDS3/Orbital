@@ -22,15 +22,15 @@ const appJson string = "application/json"
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.POST(route, handler.UpsertArgoApp)
+	r.POST(route, handler.IncreaseArgoAppReplicaCount)
 	return r
 }
 
-func TestUpsertArgoAppSuccess(t *testing.T) {
+func TestIncreaseArgoAppReplicaCountSuccess(t *testing.T) {
 	config.AppConfig = &config.Config{ArgoCDURL: "argocd.example.com:443"}
 
 	// override the dependency with mock
-	argocd.UpsertApplication = func(appName string) error {
+	argocd.IncreaseReplicaCount = func(appName string) error {
 		assert.Equal(t, "test-app", appName)
 		return nil
 	}
@@ -51,7 +51,7 @@ func TestUpsertArgoAppSuccess(t *testing.T) {
 }
 
 
-func TestUpsertArgoAppBadRequest(t *testing.T) {
+func TestIncreaseArgoAppReplicaCountBadRequest(t *testing.T) {
 	req, _ := http.NewRequest("POST", route, bytes.NewBuffer([]byte("not json")))
 	req.Header.Set(contentType, appJson)
 	w := httptest.NewRecorder()
@@ -63,10 +63,10 @@ func TestUpsertArgoAppBadRequest(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "Invalid request body")
 }
 
-func TestUpsertArgoAppFailure(t *testing.T) {
+func TestIncreaseArgoAppReplicaCountFailure(t *testing.T) {
 	config.AppConfig = &config.Config{ArgoCDURL: "https://argocd.example.com"}
 
-	argocd.UpsertApplication = func(appName string) error {
+	argocd.IncreaseReplicaCount = func(appName string) error {
 		return fmt.Errorf("simulated failure")
 	}
 
