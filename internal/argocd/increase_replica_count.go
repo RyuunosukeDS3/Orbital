@@ -12,7 +12,10 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 )
 
-var IncreaseReplicaCount = func(appName string) error {
+// Change SetReplicaCount from a function to a variable of function type
+var SetReplicaCount = setReplicaCountImpl
+
+func setReplicaCountImpl(appName string, replicaCount string) error {
 	clientOpts := apiclient.ClientOptions{
 		ServerAddr: config.AppConfig.ArgoCDURL,
 		AuthToken:  config.AppConfig.ArgoCDToken,
@@ -23,10 +26,10 @@ var IncreaseReplicaCount = func(appName string) error {
 		return fmt.Errorf("failed to create ArgoCD client: %w", err)
 	}
 	defer func() {
-        if err := conn.Close(); err != nil {
-            fmt.Printf("warning: failed to close connection: %v\n", err)
-        }
-    }()
+		if err := conn.Close(); err != nil {
+			fmt.Printf("warning: failed to close connection: %v\n", err)
+		}
+	}()
 
 	ctx := context.Background()
 
@@ -35,14 +38,14 @@ var IncreaseReplicaCount = func(appName string) error {
 		return fmt.Errorf("failed to get ArgoCD app: %w", err)
 	}
 
-	updated, err := UpdateReplicaCount(app.Spec.DeepCopy())
+	updatedSpec, err := UpdateReplicaCount(app.Spec.DeepCopy(), replicaCount)
 	if err != nil {
 		return err
 	}
 
 	_, err = appIf.UpdateSpec(ctx, &appclient.ApplicationUpdateSpecRequest{
 		Name: &appName,
-		Spec: updated,
+		Spec: updatedSpec,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update replicaCount: %w", err)
@@ -51,9 +54,9 @@ var IncreaseReplicaCount = func(appName string) error {
 	return nil
 }
 
-func UpdateReplicaCount(spec *v1alpha1.ApplicationSpec) (*v1alpha1.ApplicationSpec, error) {
-	replicaCount := "1"
+// Rest of your functions stay unchanged
 
+func UpdateReplicaCount(spec *v1alpha1.ApplicationSpec, replicaCount string) (*v1alpha1.ApplicationSpec, error) {
 	for i := range spec.Sources {
 		if UpdateSourceIfTargeted(&spec.Sources[i], replicaCount) {
 			return spec, nil

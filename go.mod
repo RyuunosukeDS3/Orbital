@@ -7,6 +7,8 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/joho/godotenv v1.5.1
+	github.com/mdlayher/wol v0.0.0-20220221231636-b763a792253a
+	github.com/rumblefrog/go-a2s v1.0.2
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -160,6 +162,7 @@ require (
 	github.com/jjti/go-spancheck v0.6.4 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/josharian/native v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/julz/importas v0.2.0 // indirect
 	github.com/karamaru-alpha/copyloopvar v1.2.1 // indirect
@@ -189,6 +192,9 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
+	github.com/mdlayher/ethernet v0.0.0-20190313224307-5b5fc417d966 // indirect
+	github.com/mdlayher/packet v1.0.0 // indirect
+	github.com/mdlayher/socket v0.2.1 // indirect
 	github.com/mgechev/revive v1.7.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

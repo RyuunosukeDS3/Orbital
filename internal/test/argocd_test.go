@@ -83,7 +83,7 @@ func TestUpdateReplicaCount(t *testing.T) {
 			},
 		},
 	}
-	newSpec, err := argocd.UpdateReplicaCount(spec)
+	newSpec, err := argocd.UpdateReplicaCount(spec, "1")
 	assert.NoError(t, err)
 	assert.Equal(t, "1", newSpec.Sources[0].Helm.Parameters[0].Value)
 
@@ -96,6 +96,6 @@ func TestUpdateReplicaCount(t *testing.T) {
 			},
 		},
 	}
-	_, err = argocd.UpdateReplicaCount(spec2)
+	_, err = argocd.UpdateReplicaCount(spec2, "1")
 	assert.ErrorContains(t, err, "could not find a source with a valueFile ending in")
 }
