@@ -2,6 +2,7 @@ package valve
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/rumblefrog/go-a2s"
@@ -14,7 +15,13 @@ var QueryVrisingPlayersNum = func(ip string, port string) (uint8, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to create A2S client: %w", err)
 	}
-	defer client.Close()
+	
+	defer func() {
+		if err := client.Close(); err != nil {
+			log.Printf("failed to close client: %v", err)
+		}
+	}()
+	
 
 	info, err := client.QueryInfo()
 	if err != nil {
