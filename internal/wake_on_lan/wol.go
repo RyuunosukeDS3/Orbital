@@ -27,7 +27,7 @@ var WakeOnLan = func(mac string) error {
         }
     }()
 
-    if err := c.Wake("255.255.255.255", macAddress); err != nil {
+    if err := c.Wake("255.255.255.255:9", macAddress); err != nil {
         return fmt.Errorf("failed to send magic packet: %w", err)
     }
 
